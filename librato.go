@@ -16,7 +16,7 @@ type Measurement struct {
 	Counters []*Counter    `json:"counters"`
 	Gauges   []interface{} `json:"gauges"`
 	Source   string        `json:"source,omitempty"`
-	Time     int           `json:"time"`
+	Time     int64         `json:"time"`
 }
 
 func (m *Measurement) Count() int {
