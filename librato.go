@@ -9,12 +9,14 @@ import (
 	"math"
 	"net/http"
 	"sort"
+	"time"
 )
 
 type Measurement struct {
 	Counters []*Counter    `json:"counters"`
 	Gauges   []interface{} `json:"gauges"`
 	Source   string        `json:"source,omitempty"`
+	Time     int           `json:"time"`
 }
 
 func (m *Measurement) Count() int {
@@ -80,7 +82,7 @@ func submitLibrato() (err error) {
 		return fmt.Errorf("%s: %s", resp.Status, string(raw))
 	}
 
-	log.Printf("%d measurements sent to librato\n", m.Count())
+	log.Printf("%d measurements sent to librato, timestamp: %d\n", m.Count(), m.Time)
 
 	resetTimers()
 
@@ -91,6 +93,12 @@ func buildMeasurement() (m *Measurement) {
 	m = &Measurement{}
 	if libratoSource != nil {
 		m.Source = *libratoSource
+	}
+
+	if *alignTimestamp {
+		// unix timestamp, matching our interval
+		t := time.Now().Unix()
+		m.Time = t - (t % *interval)
 	}
 
 	m.Counters = make([]*Counter, len(counters))
