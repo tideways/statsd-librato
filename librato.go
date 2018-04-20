@@ -16,7 +16,7 @@ type Measurement struct {
 	Counters []*Counter    `json:"counters"`
 	Gauges   []interface{} `json:"gauges"`
 	Source   string        `json:"source,omitempty"`
-	Time     int64         `json:"measure_time, omitempty"`
+	Time     int64         `json:"measure_time"`
 }
 
 func (m *Measurement) Count() int {
@@ -95,11 +95,12 @@ func buildMeasurement() (m *Measurement) {
 		m.Source = *libratoSource
 	}
 
+	t := time.Now().Unix()
 	if *snapTime {
 		// unix timestamp, matching our interval
-		t := time.Now().Unix()
-		m.Time = t - (t % *interval)
+		t = t - (t % *interval)
 	}
+	m.Time = t
 
 	m.Counters = make([]*Counter, len(counters))
 	m.Gauges = make([]interface{}, len(gauges))
